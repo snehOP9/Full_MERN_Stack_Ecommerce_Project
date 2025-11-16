@@ -38,21 +38,21 @@ const Footer = () => {
               <h4 className="text-white mb-4">Contact Us</h4>
               <div>
                 <address className="text-white fs-6">
-                  Hno : Daiict college, Reliance Cross Rd, <br />{" "}
-                  Gandhinagar,Gujarat <br />
-                  PinCode: 382007
+                  Hno : 308, Street No.2 near V2 mall <br />{" "}
+                  Laxmi Nagar, New Delhi <br />
+                  PinCode: 110093
                 </address>
                 <a
-                  href="tel:+91 8264954234"
+                  href="tel:+91 9241920176"
                   className="mt-3 d-block mb-1 text-white"
                 >
-                  +91 8264954234
+                  +91 9241920176
                 </a>
                 <a
-                  href="mailto:devjariwala8444@gmail.com"
+                  href="mailto:sneh.raunak@zohomail.in"
                   className="mt-2 d-block mb-0 text-white"
                 >
-                  devjariwala8444@gmail.com
+                  sneh.raunak@zohomail.in
                 </a>
                 <div className="social_icons d-flex align-items-center gap-30 mt-4">
                   <a className="text-white" href="#">

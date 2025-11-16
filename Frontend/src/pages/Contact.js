@@ -130,18 +130,18 @@ const Contact = () => {
                     <li className="mb-3 d-flex gap-15 align-items-center">
                       <AiOutlineHome className="fs-5" />
                       <address className="mb-0">
-                        Hno : Daiict college, Reliance Cross Rd,
-                        Gandhinagar,Gujarat, 382007
+                        Hno : 308, Street No.2 near V2 mall
+                        Laxmi Nagar, New Delhi
                       </address>
                     </li>
                     <li className="mb-3 d-flex gap-15 align-items-center">
                       <BiPhoneCall className="fs-5" />
-                      <a href="tel:+91 8264954234">+91 8264954234</a>
+                      <a href="tel:+91 9241920176">+91 9241920176</a>
                     </li>
                     <li className="mb-3 d-flex gap-15 align-items-center">
                       <AiOutlineMail className="fs-5" />
-                      <a href="mailto:devjariwala8444@gmail.com">
-                        devjariwala8444@gmail.com
+                      <a href="mailto:sneh.raunak@zohomail.in">
+                        sneh.raunak@zohomail.in
                       </a>
                     </li>
                     <li className="mb-3 d-flex gap-15 align-items-center">
