@@ -17,7 +17,6 @@ let passwordSchema = yup.object({
 const Resetpassword = () => {
   const location = useLocation();
   const getToken = location.pathname.split("/")[2];
-  console.log(getToken);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const formik = useFormik({
