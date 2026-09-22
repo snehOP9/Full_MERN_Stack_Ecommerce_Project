@@ -26,33 +26,35 @@ const uploadPhoto = multer({
   limits: { fileSize: 1000000 },
 });
 
-const productImgResize = async (req, res, next) => {
-  if (!req.files) return next();
+const resizeImages = async (files, destination) => {
   await Promise.all(
-    req.files.map(async (file) => {
-      await sharp(file.path)
-        .resize(300, 300)
-        .toFormat("jpeg")
-        .jpeg({ quality: 90 })
-        .toFile(`public/images/products/${file.filename}`);
-      fs.unlinkSync(`public/images/products/${file.filename}`);
+    files.map(async (file) => {
+      try {
+        await sharp(file.path)
+          .resize(300, 300)
+          .toFormat("jpeg")
+          .jpeg({ quality: 90 })
+          .toFile(path.join(destination, file.filename));
+      } finally {
+        try {
+          await fs.promises.unlink(file.path);
+        } catch (error) {
+          if (error.code !== "ENOENT") throw error;
+        }
+      }
     })
   );
+};
+
+const productImgResize = async (req, res, next) => {
+  if (!req.files) return next();
+  await resizeImages(req.files, path.join("public", "images", "products"));
   next();
 };
 
 const blogImgResize = async (req, res, next) => {
   if (!req.files) return next();
-  await Promise.all(
-    req.files.map(async (file) => {
-      await sharp(file.path)
-        .resize(300, 300)
-        .toFormat("jpeg")
-        .jpeg({ quality: 90 })
-        .toFile(`public/images/blogs/${file.filename}`);
-      fs.unlinkSync(`public/images/blogs/${file.filename}`);
-    })
-  );
+  await resizeImages(req.files, path.join("public", "images", "blogs"));
   next();
 };
 module.exports = { uploadPhoto, productImgResize, blogImgResize };
