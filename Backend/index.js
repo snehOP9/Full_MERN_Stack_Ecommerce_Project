@@ -5,7 +5,7 @@ const dbConnect = require("./config/dbConnect");
 const { notFound, errorHandler } = require("./middlewares/errorHandler");
 const app = express();
 const dotenv = require("dotenv").config();
-const PORT = 5000;
+const PORT = Number(process.env.PORT) || 5000;
 const authRouter = require("./routes/authRoute");
 const productRouter = require("./routes/productRoute");
 const blogRouter = require("./routes/blogRoute");
@@ -22,7 +22,10 @@ const cors = require("cors");
 
 dbConnect();
 app.use(morgan("dev"));
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  credentials: true
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -40,5 +43,5 @@ app.use("/api/upload", uploadRouter);
 app.use(notFound);
 app.use(errorHandler);
 app.listen(PORT, () => {
-  console.log(`Server is running  at PORT ${PORT}`);
+  console.log(`Server is running at PORT ${PORT}`);
 });
