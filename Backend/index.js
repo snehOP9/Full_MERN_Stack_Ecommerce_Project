@@ -5,6 +5,12 @@ const dbConnect = require("./config/dbConnect");
 const { notFound, errorHandler } = require("./middlewares/errorHandler");
 const app = express();
 const dotenv = require("dotenv").config();
+
+const requiredEnv = ["MONGODB_URL", "JWT_SECRET"];
+const missingEnv = requiredEnv.filter((name) => !process.env[name]);
+if (missingEnv.length > 0) {
+  throw new Error(`Missing required environment variables: ${missingEnv.join(", ")}`);
+}
 const PORT = 5000;
 const authRouter = require("./routes/authRoute");
 const productRouter = require("./routes/productRoute");
