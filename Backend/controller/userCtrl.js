@@ -344,6 +344,16 @@ const getWishlist = asyncHandler(async (req, res) => {
 const userCart = asyncHandler(async (req, res) => {
   const { productId, color, quantity, price } = req.body;
 
+  const normalizedQuantity = Number(quantity);
+  if (
+    !Number.isInteger(normalizedQuantity) ||
+    normalizedQuantity < 1 ||
+    normalizedQuantity > 100
+  ) {
+    res.status(400);
+    throw new Error("Quantity must be an integer between 1 and 100");
+  }
+
   const { _id } = req.user;
   validateMongoDbId(_id);
   try {
@@ -352,7 +362,7 @@ const userCart = asyncHandler(async (req, res) => {
       productId,
       color,
       price,
-      quantity,
+      quantity: normalizedQuantity,
     }).save();
     res.json(newCart);
   } catch (error) {
@@ -407,13 +417,26 @@ const updateProductQuantityFromCart = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   const { cartItemId, newQuantity } = req.params;
   validateMongoDbId(_id);
+  const normalizedQuantity = Number(newQuantity);
+  if (
+    !Number.isInteger(normalizedQuantity) ||
+    normalizedQuantity < 1 ||
+    normalizedQuantity > 100
+  ) {
+    res.status(400);
+    throw new Error("Quantity must be an integer between 1 and 100");
+  }
   try {
     const cartItem = await Cart.findOne({
       userId: _id,
       _id: cartItemId,
     });
-    cartItem.quantity = newQuantity;
-    cartItem.save();
+    if (!cartItem) {
+      res.status(404);
+      throw new Error("Cart item not found");
+    }
+    cartItem.quantity = normalizedQuantity;
+    await cartItem.save();
     res.json(cartItem);
   } catch (error) {
     throw new Error(error);
