@@ -196,7 +196,9 @@ const saveAddress = asyncHandler(async (req, res, next) => {
 
 const getallUser = asyncHandler(async (req, res) => {
   try {
-    const getUsers = await User.find().populate("wishlist");
+    const getUsers = await User.find()
+      .select("-password -refreshToken -passwordResetToken -passwordResetExpires")
+      .populate("wishlist");
     res.json(getUsers);
   } catch (error) {
     throw new Error(error);
@@ -210,7 +212,9 @@ const getaUser = asyncHandler(async (req, res) => {
   validateMongoDbId(id);
 
   try {
-    const getaUser = await User.findById(id);
+    const getaUser = await User.findById(id).select(
+      "-password -refreshToken -passwordResetToken -passwordResetExpires"
+    );
     res.json({
       getaUser,
     });
@@ -451,7 +455,10 @@ const getMyOrders = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   try {
     const orders = await Order.find({ user: _id })
-      .populate("user")
+      .populate(
+        "user",
+        "-password -refreshToken -passwordResetToken -passwordResetExpires"
+      )
       .populate("orderItems.product")
       .populate("orderItems.color");
     res.json({
@@ -465,7 +472,10 @@ const getMyOrders = asyncHandler(async (req, res) => {
 const getAllOrders = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   try {
-    const orders = await Order.find().populate("user");
+    const orders = await Order.find().populate(
+      "user",
+      "-password -refreshToken -passwordResetToken -passwordResetExpires"
+    );
     // .populate("orderItems.product")
     // .populate("orderItems.color");
     res.json({
@@ -480,7 +490,10 @@ const getsingleOrder = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
     const orders = await Order.findOne({ _id: id })
-      .populate("user")
+      .populate(
+        "user",
+        "-password -refreshToken -passwordResetToken -passwordResetExpires"
+      )
       .populate("orderItems.product")
       .populate("orderItems.color");
     res.json({
