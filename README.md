@@ -1,4 +1,9 @@
 # Full_MERN_Stack_Ecommerce_Project
+## Backend runtime configuration
+
+The Express backend reads its listening port from the `PORT` environment variable and falls back to `5000` for local development. Copy `Backend/.env.example` to `Backend/.env`, keep local secrets out of Git, and let the hosting platform supply `PORT` in production.
+
+
 1. MERN Stack
 For the ecommerce website, we have adopted the MERN stack, which comprises MongoDB, Express.js, React.js, and Node.js. This technology stack allows us to build a dynamic and user-friendly web application that leverages the power of both front-end and back-end technologies. Let's dive into the details of each component:
 1	Technology Stack:
