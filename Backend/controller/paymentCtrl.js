@@ -14,6 +14,32 @@ const getRazorpayInstance = () => {
   return new Razorpay({ key_id, key_secret });
 };
 
+const verifyRazorpaySignature = (orderId, paymentId, signature, secret) => {
+  if (
+    typeof orderId !== "string" ||
+    typeof paymentId !== "string" ||
+    typeof signature !== "string" ||
+    typeof secret !== "string" ||
+    !orderId ||
+    !paymentId ||
+    !signature ||
+    !secret ||
+    !/^[a-f0-9]{64}$/i.test(signature)
+  ) {
+    return false;
+  }
+
+  const expectedSignature = crypto
+    .createHmac("sha256", secret)
+    .update(`${orderId}|${paymentId}`)
+    .digest("hex");
+
+  const expected = Buffer.from(expectedSignature, "hex");
+  const received = Buffer.from(signature, "hex");
+
+  return received.length === expected.length && crypto.timingSafeEqual(expected, received);
+};
+
 const checkout = async (req, res) => {
   const amount = Number(req.body.amount);
 
@@ -55,18 +81,7 @@ const paymentVerification = async (req, res) => {
     return res.status(503).json({ success: false, message: "Payment verification is not configured" });
   }
 
-  const expectedSignature = crypto
-    .createHmac("sha256", secret)
-    .update(`${orderCreationId}|${razorpayPaymentId}`)
-    .digest("hex");
-
-  const expected = Buffer.from(expectedSignature, "hex");
-  const received = Buffer.from(razorpaySignature, "hex");
-
-  if (
-    received.length !== expected.length ||
-    !crypto.timingSafeEqual(expected, received)
-  ) {
+  if (!verifyRazorpaySignature(orderCreationId, razorpayPaymentId, razorpaySignature, secret)) {
     return res.status(400).json({ success: false, message: "Payment verification failed" });
   }
 
@@ -81,4 +96,5 @@ const paymentVerification = async (req, res) => {
 module.exports = {
   checkout,
   paymentVerification,
+  verifyRazorpaySignature,
 };
