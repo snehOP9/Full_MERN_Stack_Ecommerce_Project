@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import axios from "axios";
-import { config } from "../utils/axiosConfig";
+import { base_url, config } from "../utils/axiosConfig";
 import {
   createAnOrder,
   deleteUserCart,
@@ -130,7 +130,7 @@ const Checkout = () => {
       return;
     }
     const result = await axios.post(
-      "http://localhost:5000/api/user/order/checkout",
+      `${base_url}user/order/checkout`,
       { amount: totalAmount + 100 },
       config
     );
@@ -158,7 +158,7 @@ const Checkout = () => {
         };
 
         const result = await axios.post(
-          "http://localhost:5000/api/user/order/paymentVerification",
+          `${base_url}user/order/paymentVerification`,
           data,
           config
         );
