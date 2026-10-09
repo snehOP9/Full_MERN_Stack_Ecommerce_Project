@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const Razorpay = require("razorpay");
+const asyncHandler = require("express-async-handler");
 
 const getRazorpayInstance = () => {
   const key_id = process.env.RAZORPAY_KEY_ID;
@@ -40,7 +41,7 @@ const verifyRazorpaySignature = (orderId, paymentId, signature, secret) => {
   return received.length === expected.length && crypto.timingSafeEqual(expected, received);
 };
 
-const checkout = async (req, res) => {
+const checkout = asyncHandler(async (req, res) => {
   const amount = Number(req.body.amount);
 
   if (!Number.isFinite(amount) || amount <= 0) {
@@ -57,9 +58,9 @@ const checkout = async (req, res) => {
     key: process.env.RAZORPAY_KEY_ID,
     order,
   });
-};
+});
 
-const paymentVerification = async (req, res) => {
+const paymentVerification = asyncHandler(async (req, res) => {
   const { orderCreationId, razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
 
   if (
@@ -91,7 +92,7 @@ const paymentVerification = async (req, res) => {
     razorpayPaymentId,
     razorpaySignature,
   });
-};
+});
 
 module.exports = {
   checkout,
