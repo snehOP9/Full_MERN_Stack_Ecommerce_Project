@@ -151,5 +151,6 @@ These requirements serve as a foundation for the development of the ecommerce we
 
 ![Screenshot_2023-08-04_09-53-31](https://github.com/DevJariwala5/Full_MERN_Stack_Ecommerce_Project/assets/111644496/d9e0ce93-05be-45ee-aedc-5b5ba83bee67)
 
+## Backend deployment configuration
 
-
+The backend listens on `process.env.PORT` when the hosting platform provides one, and falls back to port `5000` for local development. Set `PORT` in the deployment environment rather than hardcoding a platform-specific port in source code.
