@@ -540,7 +540,7 @@ const getMonthWiseOrderIncome = asyncHandler(async (req, res) => {
       $group: {
         _id: {
           year: { $year: "$createdAt" },
-          month: "$month",
+          month: { $subtract: [{ $month: "$createdAt" }, 1] },
         },
         amount: { $sum: "$totalPriceAfterDiscount" },
         count: { $sum: 1 },
