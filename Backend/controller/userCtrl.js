@@ -30,8 +30,23 @@ const createUser = asyncHandler(async (req, res) => {
     /**
      * TODO:if user not found user create a new user
      */
-    const newUser = await User.create(req.body);
-    res.json(newUser);
+    const { firstname, lastname, email, mobile, password } = req.body;
+    const newUser = await User.create({
+      firstname,
+      lastname,
+      email,
+      mobile,
+      password,
+      role: "user",
+    });
+    res.status(201).json({
+      _id: newUser._id,
+      firstname: newUser.firstname,
+      lastname: newUser.lastname,
+      email: newUser.email,
+      mobile: newUser.mobile,
+      role: newUser.role,
+    });
   } else {
     /**
      * TODO:if user found then thow an error: User already exists
