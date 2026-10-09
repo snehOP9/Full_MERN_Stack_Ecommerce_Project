@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { sanitizeRichText } from "../utils/sanitizeRichText";
 
 const BlogCard = (props) => {
   const { id, title, description, image, date } = props;
@@ -18,7 +19,7 @@ const BlogCard = (props) => {
         <p
           className="desc"
           dangerouslySetInnerHTML={{
-            __html: description?.substr(0, 70) + "...",
+            __html: sanitizeRichText(description?.substr(0, 70) + "..."),
           }}
         ></p>
         <Link to={"/blog/" + id} className="button">

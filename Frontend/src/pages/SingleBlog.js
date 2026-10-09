@@ -7,6 +7,7 @@ import blog from "../images/blog-1.jpg";
 import Container from "../components/Container";
 import { useDispatch, useSelector } from "react-redux";
 import { getABlog } from "../features/blogs/blogSlice";
+import { sanitizeRichText } from "../utils/sanitizeRichText";
 
 const SingleBlog = () => {
   const blogState = useSelector((state) => state?.blog?.singleblog);
@@ -34,7 +35,7 @@ const SingleBlog = () => {
               <h3 className="title">{blogState?.title} </h3>
               <img src={blog} className="img-fluid w-100 my-4" alt="blog" />
               <p
-                dangerouslySetInnerHTML={{ __html: blogState?.description }}
+                dangerouslySetInnerHTML={{ __html: sanitizeRichText(blogState?.description) }}
               ></p>
             </div>
           </div>
