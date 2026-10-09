@@ -1,11 +1,17 @@
 require("dotenv").config();
+
+const requiredEnv = ["JWT_SECRET", "MONGODB_URL"];
+const missingEnv = requiredEnv.filter((name) => !process.env[name]?.trim());
+if (missingEnv.length) {
+  throw new Error(`Missing required environment variables: ${missingEnv.join(", ")}`);
+}
 const bodyParser = require("body-parser");
 const express = require("express");
 const dbConnect = require("./config/dbConnect");
 const { notFound, errorHandler } = require("./middlewares/errorHandler");
 const app = express();
 const dotenv = require("dotenv").config();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 const authRouter = require("./routes/authRoute");
 const productRouter = require("./routes/productRoute");
 const blogRouter = require("./routes/blogRoute");
