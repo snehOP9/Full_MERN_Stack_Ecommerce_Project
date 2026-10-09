@@ -108,17 +108,14 @@ const Checkout = () => {
   };
 
   useEffect(() => {
-    let items = [];
-    for (let index = 0; index < cartState?.length; index++) {
-      items.push({
-        product: cartState[index].productId._id,
-        quantity: cartState[index].quantity,
-        color: cartState[index].color._id,
-        price: cartState[index].price,
-      });
-    }
+    const items = (cartState || []).map((item) => ({
+      product: item.productId._id,
+      quantity: item.quantity,
+      color: item.color._id,
+      price: item.price,
+    }));
     setCartProductState(items);
-  }, []);
+  }, [cartState]);
 
   const checkOutHandler = async () => {
     const res = await loadScript(
