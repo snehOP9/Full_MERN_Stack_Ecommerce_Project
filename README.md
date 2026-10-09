@@ -153,4 +153,4 @@ These requirements serve as a foundation for the development of the ecommerce we
 
 ## Backend deployment configuration
 
-The backend listens on `process.env.PORT` when the hosting platform provides one, and falls back to port `5000` for local development. Set `PORT` in the deployment environment rather than hardcoding a platform-specific port in source code.
+The backend listens on `process.env.PORT` when the hosting platform provides one, and falls back to port `5000` for local development. Set `PORT` in the deployment environment rather than hardcoding a platform-specific port in source code. Startup also requires non-empty `JWT_SECRET` and `MONGODB_URL` values; the server fails fast and lists missing variable names without printing secret values.
