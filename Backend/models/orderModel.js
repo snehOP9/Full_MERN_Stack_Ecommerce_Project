@@ -75,7 +75,7 @@ var orderSchema = new mongoose.Schema(
     },
     month: {
       type: Number,
-      default: new Date().getMonth(),
+      default: () => new Date().getMonth(),
     },
     totalPrice: {
       type: Number,
