@@ -293,13 +293,13 @@ const updatePassword = asyncHandler(async (req, res) => {
 
 const forgotPasswordToken = asyncHandler(async (req, res) => {
   const { email } = req.body;
+  const genericResponse = { message: "If an account exists for this email, a password reset link has been sent." };
   const user = await User.findOne({ email });
-  if (!user) throw new Error("User not found with this email");
+  if (!user) return res.json(genericResponse);
   try {
     const token = await user.createPasswordResetToken();
 
     await user.save();
-    console.log(token);
     const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:3000").replace(/\/+$/, "");
     const resetURL = `Hi, Please follow this link to reset Your Password. This link is valid till 10 minutes from now. <a href='${frontendUrl}/reset-password/${token}'>Click Here</a>`;
 
@@ -309,8 +309,8 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
       subject: "Forgot Password Link",
       htm: resetURL,
     };
-    sendEmail(data);
-    res.json(token);
+    await sendEmail(data);
+    return res.json(genericResponse);
   } catch (error) {
     throw new Error(error);
   }
