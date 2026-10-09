@@ -71,7 +71,7 @@ var orderSchema = new mongoose.Schema(
     ],
     paidAt: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
     },
     month: {
       type: Number,
