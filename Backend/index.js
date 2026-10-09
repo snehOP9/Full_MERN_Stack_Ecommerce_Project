@@ -1,4 +1,10 @@
 require("dotenv").config();
+
+const requiredEnv = ["JWT_SECRET", "MONGODB_URL"];
+const missingEnv = requiredEnv.filter((name) => !process.env[name]?.trim());
+if (missingEnv.length) {
+  throw new Error(`Missing required environment variables: ${missingEnv.join(", ")}`);
+}
 const bodyParser = require("body-parser");
 const express = require("express");
 const dbConnect = require("./config/dbConnect");
