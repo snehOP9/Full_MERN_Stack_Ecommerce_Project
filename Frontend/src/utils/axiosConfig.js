@@ -1,4 +1,5 @@
-export const base_url = "http://localhost:5000/api/";
+const configuredApiBaseUrl = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000/api";
+export const base_url = `${configuredApiBaseUrl.replace(/\/+$/, "")}/`;
 const getTokenFromLocalStorage = localStorage.getItem("customer")
   ? JSON.parse(localStorage.getItem("customer"))
   : null;
