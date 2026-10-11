@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BsArrowDownRight, BsArrowUpRight } from "react-icons/bs";
 import { Column } from "@ant-design/plots";
 import { Table } from "antd";
+import { formatMonthlyOrderData } from "../utils/monthlyOrderData";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getMonthlyData,
@@ -68,37 +69,9 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    let monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-    let data = [];
-
-    let monthlyOrderCount = [];
-    for (let index = 0; index < monthlyDataState?.length; index++) {
-      const element = monthlyDataState[index];
-      data.push({
-        type: monthNames[element?._id?.month],
-        income: element?.amount,
-      });
-      monthlyOrderCount.push({
-        type: monthNames[element?._id?.month],
-        income: element?.count,
-      });
-    }
-
-    setDataMonthly(data);
-    setDataMonthlySales(monthlyOrderCount);
+    const { income, sales } = formatMonthlyOrderData(monthlyDataState);
+    setDataMonthly(income);
+    setDataMonthlySales(sales);
 
     const data1 = [];
 
