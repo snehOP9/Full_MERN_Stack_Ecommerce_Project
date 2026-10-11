@@ -55,8 +55,8 @@ router.get("/getallorders", authMiddleware, isAdmin, getAllOrders);
 router.get("/getaOrder/:id", authMiddleware, isAdmin, getsingleOrder);
 router.put("/updateOrder/:id", authMiddleware, isAdmin, updateOrder);
 
-router.get("/getMonthWiseOrderIncome", authMiddleware, getMonthWiseOrderIncome);
-router.get("/getyearlyorders", authMiddleware, getYearlyTotalOrder);
+router.get("/getMonthWiseOrderIncome", authMiddleware, isAdmin, getMonthWiseOrderIncome);
+router.get("/getyearlyorders", authMiddleware, isAdmin, getYearlyTotalOrder);
 
 router.get("/refresh", handleRefreshToken);
 router.get("/logout", logout);
