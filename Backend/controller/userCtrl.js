@@ -102,8 +102,6 @@ const loginAdmin = asyncHandler(async (req, res) => {
       mobile: findAdmin?.mobile,
       token: generateToken(findAdmin?._id),
     });
-  } else {
-    throw new Error("Invalid Credentials");
   }
 });
 
