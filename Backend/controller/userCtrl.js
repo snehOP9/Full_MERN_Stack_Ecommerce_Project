@@ -77,9 +77,11 @@ const loginAdmin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   // check if user exists or not
   const findAdmin = await User.findOne({ email });
-  if (!findAdmin) throw new Error("Invalid Credentials");
+  if (!findAdmin || !(await findAdmin.isPasswordMatched(password))) {
+    throw new Error("Invalid Credentials");
+  }
   if (findAdmin.role !== "admin") throw new Error("Not Authorised");
-  if (findAdmin && (await findAdmin.isPasswordMatched(password))) {
+  {
     const refreshToken = await generateRefreshToken(findAdmin?._id);
     const updateuser = await User.findByIdAndUpdate(
       findAdmin.id,
@@ -100,8 +102,6 @@ const loginAdmin = asyncHandler(async (req, res) => {
       mobile: findAdmin?.mobile,
       token: generateToken(findAdmin?._id),
     });
-  } else {
-    throw new Error("Invalid Credentials");
   }
 });
 
