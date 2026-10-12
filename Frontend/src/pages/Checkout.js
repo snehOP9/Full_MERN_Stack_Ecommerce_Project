@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BiArrowBack } from "react-icons/bi";
 import Container from "../components/Container";
@@ -6,7 +6,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import axios from "axios";
-import { config } from "../utils/axiosConfig";
+import { base_url, config } from "../utils/axiosConfig";
+import { getOrderItems, getCartTotal, isValidCheckoutCart } from "../utils/checkout";
 import {
   createAnOrder,
   deleteUserCart,
@@ -28,21 +29,12 @@ const Checkout = () => {
   const dispatch = useDispatch();
   const cartState = useSelector((state) => state?.auth?.cartProducts);
   const authState = useSelector((state) => state?.auth);
-  const [totalAmount, setTotalAmount] = useState(null);
-  const [shippingInfo, setShippingInfo] = useState(null);
-  const [paymentInfo, setPaymentInfo] = useState({
-    razorpayPaymentId: "",
-    razorpayOrderId: "",
-  });
+  const [cartLoaded, setCartLoaded] = useState(false);
+  const [cartLoadFailed, setCartLoadFailed] = useState(false);
+  const cartProductState = useMemo(() => getOrderItems(cartState), [cartState]);
+  const totalAmount = useMemo(() => getCartTotal(cartState), [cartState]);
+  const isValidCart = isValidCheckoutCart(cartState, cartProductState);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    let sum = 0;
-    for (let index = 0; index < cartState?.length; index++) {
-      sum = sum + Number(cartState[index].quantity) * cartState[index].price;
-      setTotalAmount(sum);
-    }
-  }, [cartState]);
 
   const getTokenFromLocalStorage = localStorage.getItem("customer")
     ? JSON.parse(localStorage.getItem("customer"))
@@ -58,8 +50,19 @@ const Checkout = () => {
   };
 
   useEffect(() => {
-    dispatch(getUserCart(config2));
-  }, []);
+    let active = true;
+    dispatch(getUserCart(config2))
+      .unwrap()
+      .then(() => {
+        if (active) setCartLoaded(true);
+      })
+      .catch(() => {
+        if (active) setCartLoadFailed(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     if (
@@ -69,8 +72,6 @@ const Checkout = () => {
       navigate("/my-orders");
     }
   }, [authState]);
-
-  const [cartProductState, setCartProductState] = useState([]);
 
   const formik = useFormik({
     initialValues: {
@@ -85,11 +86,11 @@ const Checkout = () => {
     },
     validationSchema: shippingSchema,
     onSubmit: (values) => {
-      setShippingInfo(values);
-      localStorage.setItem("address", JSON.stringify(values));
-      setTimeout(() => {
-        checkOutHandler();
-      }, 300);
+      if (!cartLoaded || !isValidCart) {
+        alert("Your cart is empty, invalid, or has not finished loading.");
+        return;
+      }
+      checkOutHandler(values);
     },
   });
 
@@ -107,20 +108,8 @@ const Checkout = () => {
     });
   };
 
-  useEffect(() => {
-    let items = [];
-    for (let index = 0; index < cartState?.length; index++) {
-      items.push({
-        product: cartState[index].productId._id,
-        quantity: cartState[index].quantity,
-        color: cartState[index].color._id,
-        price: cartState[index].price,
-      });
-    }
-    setCartProductState(items);
-  }, []);
-
-  const checkOutHandler = async () => {
+  const checkOutHandler = async (shippingInfo) => {
+    if (!cartLoaded || !isValidCart) return;
     const res = await loadScript(
       "https://checkout.razorpay.com/v1/checkout.js"
     );
@@ -130,7 +119,7 @@ const Checkout = () => {
       return;
     }
     const result = await axios.post(
-      "http://localhost:5000/api/user/order/checkout",
+      `${base_url}user/order/checkout`,
       { amount: totalAmount + 100 },
       config
     );
@@ -158,7 +147,7 @@ const Checkout = () => {
         };
 
         const result = await axios.post(
-          "http://localhost:5000/api/user/order/paymentVerification",
+          `${base_url}user/order/paymentVerification`,
           data,
           config
         );
@@ -169,11 +158,10 @@ const Checkout = () => {
             totalPriceAfterDiscount: totalAmount,
             orderItems: cartProductState,
             paymentInfo: result.data,
-            shippingInfo: JSON.parse(localStorage.getItem("address")),
+            shippingInfo,
           })
         );
         dispatch(deleteUserCart(config2));
-        localStorage.removeItem("address");
         dispatch(resetState());
       },
       prefill: {
@@ -234,6 +222,9 @@ const Checkout = () => {
                 Dev Jariwala (devjariwala8444@gmail.com)
               </p>
               <h4 className="mb-3">Shipping Address</h4>
+              {cartLoadFailed && (
+                <p role="alert">Unable to load your cart. Return to your cart and try again.</p>
+              )}
               <form
                 onSubmit={formik.handleSubmit}
                 action=""
@@ -365,8 +356,8 @@ const Checkout = () => {
                     <Link to="/cart" className="button">
                       Continue to Shipping
                     </Link>
-                    <button className="button" type="submit">
-                      Place Order
+                    <button className="button" type="submit" disabled={!cartLoaded || !isValidCart}>
+                      {cartLoaded ? "Place Order" : "Loading cart..."}
                     </button>
                   </div>
                 </div>
