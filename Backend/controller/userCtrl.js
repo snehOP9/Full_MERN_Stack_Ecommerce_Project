@@ -114,13 +114,17 @@ const handleRefreshToken = asyncHandler(async (req, res) => {
   const refreshToken = cookie.refreshToken;
   const user = await User.findOne({ refreshToken });
   if (!user) throw new Error(" No Refresh token present in db or not matched");
-  jwt.verify(refreshToken, process.env.JWT_SECRET, (err, decoded) => {
-    if (err || user.id !== decoded.id) {
-      throw new Error("There is something wrong with refresh token");
-    }
-    const accessToken = generateToken(user?._id);
-    res.json({ accessToken });
-  });
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+  } catch {
+    return res.status(401).json({ message: "Invalid refresh token" });
+  }
+  if (String(user._id) !== String(decoded.id)) {
+    return res.status(401).json({ message: "Invalid refresh token" });
+  }
+  const accessToken = generateToken(user._id);
+  return res.json({ accessToken });
 });
 
 // logout functionality
@@ -137,9 +141,7 @@ const logout = asyncHandler(async (req, res) => {
     });
     return res.sendStatus(204); // forbidden
   }
-  await User.findOneAndUpdate(refreshToken, {
-    refreshToken: "",
-  });
+  await User.updateOne({ _id: user._id, refreshToken }, { $set: { refreshToken: "" } });
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: true,
@@ -301,7 +303,6 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
     const token = await user.createPasswordResetToken();
 
     await user.save();
-    console.log(token);
     const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:3000").replace(/\/$/, "");
     const resetURL = `Hi, Please follow this link to reset Your Password. This link is valid till 10 minutes from now. <a href='${frontendUrl}/reset-password/${token}'>Click Here</a>`;
 
@@ -311,8 +312,8 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
       subject: "Forgot Password Link",
       htm: resetURL,
     };
-    sendEmail(data);
-    res.json(token);
+    await sendEmail(data);
+    res.status(200).json({ message: "If this account exists, password reset instructions have been sent." });
   } catch (error) {
     throw new Error(error);
   }
