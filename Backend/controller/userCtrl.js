@@ -21,18 +21,23 @@ const createUser = asyncHandler(async (req, res) => {
   /**
    * TODO:Get the email from req.body
    */
-  const email = req.body.email;
+  const { firstname, lastname, email, mobile, password } = req.body;
   /**
    * TODO:With the help of email find the user exists or not
    */
-  const findUser = await User.findOne({ email: email });
+  const findUser = await User.findOne({ email });
 
   if (!findUser) {
-    /**
-     * TODO:if user not found user create a new user
-     */
-    const newUser = await User.create(req.body);
-    res.json(newUser);
+    // Do not accept role, refreshToken, or password-reset fields from public signups.
+    const newUser = await User.create({ firstname, lastname, email, mobile, password });
+    res.status(201).json({
+      _id: newUser._id,
+      firstname: newUser.firstname,
+      lastname: newUser.lastname,
+      email: newUser.email,
+      mobile: newUser.mobile,
+      role: newUser.role,
+    });
   } else {
     /**
      * TODO:if user found then thow an error: User already exists
