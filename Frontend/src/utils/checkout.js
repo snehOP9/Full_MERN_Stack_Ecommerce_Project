@@ -10,7 +10,13 @@ export const getOrderItems = (cart) =>
 
 export const getCartTotal = (cart) =>
   Array.isArray(cart)
-    ? cart.reduce((sum, item) => sum + Number(item?.quantity) * Number(item?.price), 0)
+    ? cart.reduce((sum, item) => {
+        const quantity = Number(item?.quantity);
+        const price = Number(item?.price);
+        return Number.isFinite(quantity) && Number.isFinite(price)
+          ? sum + quantity * price
+          : sum;
+      }, 0)
     : 0;
 
 export const isValidCheckoutCart = (cart, orderItems) =>
