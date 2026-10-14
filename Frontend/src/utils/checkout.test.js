@@ -58,3 +58,8 @@ test("does not propagate invalid numbers into the displayed cart total", () => {
   expect(getCartTotal([item("p1", Infinity, 10)])).toBe(0);
   expect(getCartTotal([item("p1", 2, 10)])).toBe(20);
 });
+
+test("rejects cart items whose subtotals overflow", () => {
+  const cart = [item("p1", 2, Number.MAX_VALUE)];
+  expect(isValidCheckoutCart(cart, getOrderItems(cart))).toBe(false);
+});
