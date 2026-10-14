@@ -52,3 +52,9 @@ test("rejects missing order item arrays and blank identifiers", () => {
     expect(isValidCheckoutCart(bad, getOrderItems(bad))).toBe(false);
   }
 });
+
+test("does not propagate invalid numbers into the displayed cart total", () => {
+  expect(getCartTotal([item("p1", 2, NaN), item("p2", 3, 10)])).toBe(30);
+  expect(getCartTotal([item("p1", Infinity, 10)])).toBe(0);
+  expect(getCartTotal([item("p1", 2, 10)])).toBe(20);
+});
