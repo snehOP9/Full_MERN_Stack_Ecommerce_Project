@@ -63,3 +63,9 @@ test("rejects cart items whose subtotals overflow", () => {
   const cart = [item("p1", 2, Number.MAX_VALUE)];
   expect(isValidCheckoutCart(cart, getOrderItems(cart))).toBe(false);
 });
+
+test("rejects carts whose aggregate total overflows", () => {
+  const cart = [item("p1", 1, Number.MAX_VALUE), item("p2", 1, Number.MAX_VALUE)];
+  expect(getCartTotal(cart)).toBe(Infinity);
+  expect(isValidCheckoutCart(cart, getOrderItems(cart))).toBe(false);
+});
