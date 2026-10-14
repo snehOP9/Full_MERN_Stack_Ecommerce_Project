@@ -16,11 +16,14 @@ export const getCartTotal = (cart) =>
 export const isValidCheckoutCart = (cart, orderItems) =>
   Array.isArray(cart) &&
   cart.length > 0 &&
+  Array.isArray(orderItems) &&
   orderItems.length === cart.length &&
   orderItems.every(
     ({ product, color, quantity, price }) =>
-      product &&
-      color &&
+      typeof product === "string" &&
+      product.trim().length > 0 &&
+      typeof color === "string" &&
+      color.trim().length > 0 &&
       Number.isInteger(quantity) &&
       quantity > 0 &&
       Number.isFinite(price) &&
