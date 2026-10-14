@@ -34,5 +34,6 @@ export const isValidCheckoutCart = (cart, orderItems) =>
       quantity > 0 &&
       Number.isFinite(price) &&
       price >= 0 &&
+      Number.isFinite(getCartTotal(cart)) &&
       Number.isFinite(quantity * price)
   );
