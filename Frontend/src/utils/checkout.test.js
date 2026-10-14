@@ -39,3 +39,16 @@ test("rejects empty, loading, and invalid carts before checkout", () => {
     expect(isValidCheckoutCart(bad, getOrderItems(bad))).toBe(false);
   }
 });
+
+test("rejects missing order item arrays and blank identifiers", () => {
+  const cart = [item("p1")];
+  expect(isValidCheckoutCart(cart, undefined)).toBe(false);
+  expect(isValidCheckoutCart(cart, null)).toBe(false);
+  for (const bad of [
+    [{ ...item("p1"), productId: { _id: "   " } }],
+    [{ ...item("p1"), color: { _id: "" } }],
+    [{ ...item("p1"), color: { _id: "  " } }],
+  ]) {
+    expect(isValidCheckoutCart(bad, getOrderItems(bad))).toBe(false);
+  }
+});
