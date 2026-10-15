@@ -338,7 +338,7 @@ const Addproduct = () => {
                     className="btn-close position-absolute"
                     style={{ top: "10px", right: "10px" }}
                   ></button>
-                  <img src={i.url} alt={`Product image preview ${index + 1}`} width={200} height={200} />
+                  <img src={i.url} alt={`Product image preview ${j + 1}`} width={200} height={200} />
                 </div>
               );
             })}
@@ -351,7 +351,7 @@ const Addproduct = () => {
                     className="btn-close position-absolute"
                     style={{ top: "10px", right: "10px" }}
                   ></button>
-                  <img src={i.url} alt="" width={200} height={200} />
+                  <img src={i.url} alt={`Product image preview ${j + 1}`} width={200} height={200} />
                 </div>
               );
             })}
