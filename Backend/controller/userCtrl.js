@@ -14,6 +14,8 @@ const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("./emailCtrl");
 const { createPasswordResetToken } = require("../models/userModel");
+const { buildOrderItemsFromCart } = require("../utils/paymentSecurity");
+const { verifyPaymentDetails } = require("./paymentCtrl");
 
 // Create a User ----------------------------------------------
 
@@ -351,22 +353,29 @@ const getWishlist = asyncHandler(async (req, res) => {
 });
 
 const userCart = asyncHandler(async (req, res) => {
-  const { productId, color, quantity, price } = req.body;
-
+  const { productId, color, quantity } = req.body;
   const { _id } = req.user;
   validateMongoDbId(_id);
-  try {
-    let newCart = await new Cart({
-      userId: _id,
-      productId,
-      color,
-      price,
-      quantity,
-    }).save();
-    res.json(newCart);
-  } catch (error) {
-    throw new Error(error);
+
+  const parsedQuantity = Number(quantity);
+  if (!Number.isInteger(parsedQuantity) || parsedQuantity < 1) {
+    return res.status(400).json({ error: "Quantity must be a positive integer" });
   }
+
+  const product = await Product.findById(productId);
+  if (!product) return res.status(404).json({ error: "Product not found" });
+  if (parsedQuantity > Number(product.quantity)) {
+    return res.status(400).json({ error: "Requested quantity exceeds available stock" });
+  }
+
+  const newCart = await new Cart({
+    userId: _id,
+    productId,
+    color,
+    quantity: parsedQuantity,
+    price: product.price,
+  }).save();
+  return res.json(newCart);
 });
 
 const getUserCart = asyncHandler(async (req, res) => {
@@ -430,30 +439,45 @@ const updateProductQuantityFromCart = asyncHandler(async (req, res) => {
 });
 
 const createOrder = asyncHandler(async (req, res) => {
-  const {
-    shippingInfo,
-    orderItems,
-    totalPrice,
-    totalPriceAfterDiscount,
-    paymentInfo,
-  } = req.body;
+  const { shippingInfo, paymentInfo } = req.body;
   const { _id } = req.user;
+
+  const cart = await Cart.find({ userId: _id }).populate("productId");
+  let totals;
   try {
-    const order = await Order.create({
-      shippingInfo,
-      orderItems,
-      totalPrice,
-      totalPriceAfterDiscount,
-      paymentInfo,
-      user: _id,
-    });
-    res.json({
-      order,
-      success: true,
+    totals = buildOrderItemsFromCart(cart);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  let verified;
+  try {
+    verified = await verifyPaymentDetails({
+      userId: _id,
+      razorpayOrderId: paymentInfo?.razorpayOrderId,
+      razorpayPaymentId: paymentInfo?.razorpayPaymentId,
+      razorpaySignature: paymentInfo?.razorpaySignature,
     });
   } catch (error) {
-    throw new Error(error);
+    return res.status(error.statusCode || 502).json({
+      error: error.statusCode ? error.message : "Unable to verify payment",
+    });
   }
+
+  const expectedAmount = Math.round(totals.subtotal * 100) + 10000;
+  if (verified.order.amount !== expectedAmount) {
+    return res.status(409).json({ error: "Cart changed after payment checkout; please contact support before retrying" });
+  }
+
+  const order = await Order.create({
+    shippingInfo,
+    orderItems: totals.orderItems,
+    totalPrice: totals.subtotal + 100,
+    totalPriceAfterDiscount: totals.subtotal + 100,
+    paymentInfo: verified.paymentInfo,
+    user: _id,
+  });
+  return res.json({ order, success: true });
 });
 
 const getMyOrders = asyncHandler(async (req, res) => {
