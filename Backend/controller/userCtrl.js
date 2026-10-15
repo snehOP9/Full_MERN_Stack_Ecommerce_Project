@@ -16,6 +16,7 @@ const sendEmail = require("./emailCtrl");
 const { createPasswordResetToken } = require("../models/userModel");
 const { buildOrderItemsFromCart } = require("../utils/paymentSecurity");
 const { verifyPaymentDetails } = require("./paymentCtrl");
+const safeUser = require("../utils/safeUser");
 
 // Create a User ----------------------------------------------
 
@@ -175,7 +176,7 @@ const updatedUser = asyncHandler(async (req, res) => {
         new: true,
       }
     );
-    res.json(updatedUser);
+    res.json(safeUser(updatedUser));
   } catch (error) {
     throw new Error(error);
   }
@@ -207,8 +208,8 @@ const saveAddress = asyncHandler(async (req, res, next) => {
 
 const getallUser = asyncHandler(async (req, res) => {
   try {
-    const getUsers = await User.find().populate("wishlist");
-    res.json(getUsers);
+    const getUsers = await User.find().select("-password -refreshToken -passwordResetToken -passwordResetExpires").populate("wishlist");
+    res.json(getUsers.map(safeUser));
   } catch (error) {
     throw new Error(error);
   }
@@ -221,10 +222,8 @@ const getaUser = asyncHandler(async (req, res) => {
   validateMongoDbId(id);
 
   try {
-    const getaUser = await User.findById(id);
-    res.json({
-      getaUser,
-    });
+    const getaUser = await User.findById(id).select("-password -refreshToken -passwordResetToken -passwordResetExpires");
+    res.json({ getaUser: safeUser(getaUser) });
   } catch (error) {
     throw new Error(error);
   }
@@ -238,9 +237,7 @@ const deleteaUser = asyncHandler(async (req, res) => {
 
   try {
     const deleteaUser = await User.findByIdAndDelete(id);
-    res.json({
-      deleteaUser,
-    });
+    res.json({ deleteaUser: safeUser(deleteaUser) });
   } catch (error) {
     throw new Error(error);
   }
@@ -260,7 +257,7 @@ const blockUser = asyncHandler(async (req, res) => {
         new: true,
       }
     );
-    res.json(blockusr);
+    res.json(safeUser(blockusr));
   } catch (error) {
     throw new Error(error);
   }
@@ -296,9 +293,9 @@ const updatePassword = asyncHandler(async (req, res) => {
   if (password) {
     user.password = password;
     const updatedPassword = await user.save();
-    res.json(updatedPassword);
+    res.json(safeUser(updatedPassword));
   } else {
-    res.json(user);
+    res.json(safeUser(user));
   }
 });
 
@@ -358,8 +355,8 @@ const userCart = asyncHandler(async (req, res) => {
   validateMongoDbId(_id);
 
   const parsedQuantity = Number(quantity);
-  if (!Number.isInteger(parsedQuantity) || parsedQuantity < 1) {
-    return res.status(400).json({ error: "Quantity must be a positive integer" });
+  if (!Number.isInteger(parsedQuantity) || parsedQuantity < 1 || parsedQuantity > 99) {
+    return res.status(400).json({ error: "Quantity must be an integer between 1 and 99" });
   }
 
   const product = await Product.findById(productId);
@@ -426,13 +423,22 @@ const updateProductQuantityFromCart = asyncHandler(async (req, res) => {
   const { cartItemId, newQuantity } = req.params;
   validateMongoDbId(_id);
   try {
+    const quantity = Number(newQuantity);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
+      return res.status(400).json({ error: "Quantity must be an integer between 1 and 99" });
+    }
+    validateMongoDbId(cartItemId);
     const cartItem = await Cart.findOne({
       userId: _id,
       _id: cartItemId,
-    });
-    cartItem.quantity = newQuantity;
-    cartItem.save();
-    res.json(cartItem);
+    }).populate("productId");
+    if (!cartItem) return res.status(404).json({ error: "Cart item not found" });
+    if (quantity > Number(cartItem.productId?.quantity)) {
+      return res.status(400).json({ error: "Requested quantity exceeds available stock" });
+    }
+    cartItem.quantity = quantity;
+    await cartItem.save();
+    return res.json(cartItem);
   } catch (error) {
     throw new Error(error);
   }
@@ -484,7 +490,7 @@ const getMyOrders = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   try {
     const orders = await Order.find({ user: _id })
-      .populate("user")
+      .populate("user", "firstname lastname email mobile")
       .populate("orderItems.product")
       .populate("orderItems.color");
     res.json({
