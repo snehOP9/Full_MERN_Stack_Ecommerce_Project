@@ -24,7 +24,7 @@ function buildOrderItemsFromCart(cart) {
     const quantity = Number(item?.quantity);
     if (!product?._id || !item?.color ||
         !Number.isFinite(price) || price < 0 ||
-        !Number.isInteger(quantity) || quantity < 1 ||
+        !Number.isInteger(quantity) || quantity < 1 || quantity > 99 ||
         (Number.isFinite(Number(product?.quantity)) && quantity > Number(product.quantity))) {
       throw new Error("Cart contains an invalid product or quantity");
     }
