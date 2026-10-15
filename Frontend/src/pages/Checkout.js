@@ -147,28 +147,34 @@ const Checkout = () => {
           razorpaySignature: response.razorpay_signature,
         };
 
+        let paymentInfo;
         try {
-          const result = await axios.post(
+          const verification = await axios.post(
             `${base_url}user/order/paymentVerification`,
             data,
             config
           );
-
+          paymentInfo = verification.data;
           await dispatch(
             createAnOrder({
               totalPrice: totalAmount,
               totalPriceAfterDiscount: totalAmount,
               orderItems: cartProductState,
-              paymentInfo: result.data,
+              paymentInfo,
               shippingInfo,
             })
           ).unwrap();
-
-          await dispatch(deleteUserCart(config2)).unwrap();
-          dispatch(resetState());
         } catch (error) {
-          alert(error?.response?.data?.error || error?.message || "Payment was received but order confirmation failed. Please contact support before retrying.");
+          alert(error?.response?.data?.error || "Payment verification or order creation failed. Your cart has been kept; check payment status before retrying.");
+          return;
         }
+
+        try {
+          await dispatch(deleteUserCart(config2)).unwrap();
+        } catch {
+          alert("Your order was created, but cart cleanup failed. Check My Orders and do not pay again.");
+        }
+        dispatch(resetState());
       },
       prefill: {
         name: "Dev Corner",
