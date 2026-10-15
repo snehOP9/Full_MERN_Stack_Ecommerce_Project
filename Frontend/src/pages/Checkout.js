@@ -120,7 +120,7 @@ const Checkout = () => {
     }
     const result = await axios.post(
       `${base_url}user/order/checkout`,
-      { amount: totalAmount + 100 },
+      {},
       config
     );
 
@@ -132,7 +132,7 @@ const Checkout = () => {
     const { amount, id: order_id, currency } = result.data.order;
 
     const options = {
-      key: "rzp_test_HSSeDI22muUrLR", // Enter the Key ID generated from the Dashboard
+      key: result.data.keyId,
       amount: amount,
       currency: currency,
       name: "Cart's corner",
@@ -144,6 +144,7 @@ const Checkout = () => {
           orderCreationId: order_id,
           razorpayPaymentId: response.razorpay_payment_id,
           razorpayOrderId: response.razorpay_order_id,
+          razorpaySignature: response.razorpay_signature,
         };
 
         const result = await axios.post(
