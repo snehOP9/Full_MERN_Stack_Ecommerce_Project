@@ -49,7 +49,7 @@ router.post("/order/checkout", authMiddleware, checkout);
 router.post("/order/paymentVerification", authMiddleware, paymentVerification);
 
 router.post("/cart/create-order", authMiddleware, createOrder);
-router.get("/all-users", getallUser);
+router.get("/all-users", authMiddleware, isAdmin, getallUser);
 router.get("/getmyorders", authMiddleware, getMyOrders);
 router.get("/getallorders", authMiddleware, isAdmin, getAllOrders);
 router.get("/getaOrder/:id", authMiddleware, isAdmin, getsingleOrder);
@@ -78,7 +78,7 @@ router.delete(
 
 router.delete("/empty-cart", authMiddleware, emptyCart);
 
-router.delete("/:id", deleteaUser);
+router.delete("/:id", authMiddleware, isAdmin, deleteaUser);
 
 router.put("/edit-user", authMiddleware, updatedUser);
 router.put("/save-address", authMiddleware, saveAddress);
