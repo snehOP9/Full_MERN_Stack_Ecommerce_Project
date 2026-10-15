@@ -3,6 +3,7 @@ const User = require("../models/userModel");
 const asyncHandler = require("express-async-handler");
 const slugify = require("slugify");
 const validateMongoDbId = require("../utils/validateMongodbId");
+const safeUser = require("../utils/safeUser");
 
 const createProduct = asyncHandler(async (req, res) => {
   try {
@@ -116,7 +117,7 @@ const addToWishlist = asyncHandler(async (req, res) => {
           new: true,
         }
       );
-      res.json(user);
+      res.json(safeUser(user));
     } else {
       let user = await User.findByIdAndUpdate(
         _id,
