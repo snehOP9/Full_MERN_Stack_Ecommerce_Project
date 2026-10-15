@@ -39,3 +39,33 @@ test("rejects empty, loading, and invalid carts before checkout", () => {
     expect(isValidCheckoutCart(bad, getOrderItems(bad))).toBe(false);
   }
 });
+
+test("rejects missing order item arrays and blank identifiers", () => {
+  const cart = [item("p1")];
+  expect(isValidCheckoutCart(cart, undefined)).toBe(false);
+  expect(isValidCheckoutCart(cart, null)).toBe(false);
+  for (const bad of [
+    [{ ...item("p1"), productId: { _id: "   " } }],
+    [{ ...item("p1"), color: { _id: "" } }],
+    [{ ...item("p1"), color: { _id: "  " } }],
+  ]) {
+    expect(isValidCheckoutCart(bad, getOrderItems(bad))).toBe(false);
+  }
+});
+
+test("does not propagate invalid numbers into the displayed cart total", () => {
+  expect(getCartTotal([item("p1", 2, NaN), item("p2", 3, 10)])).toBe(30);
+  expect(getCartTotal([item("p1", Infinity, 10)])).toBe(0);
+  expect(getCartTotal([item("p1", 2, 10)])).toBe(20);
+});
+
+test("rejects cart items whose subtotals overflow", () => {
+  const cart = [item("p1", 2, Number.MAX_VALUE)];
+  expect(isValidCheckoutCart(cart, getOrderItems(cart))).toBe(false);
+});
+
+test("rejects carts whose aggregate total overflows", () => {
+  const cart = [item("p1", 1, Number.MAX_VALUE), item("p2", 1, Number.MAX_VALUE)];
+  expect(getCartTotal(cart)).toBe(Infinity);
+  expect(isValidCheckoutCart(cart, getOrderItems(cart))).toBe(false);
+});

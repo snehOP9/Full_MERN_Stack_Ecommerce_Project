@@ -10,19 +10,30 @@ export const getOrderItems = (cart) =>
 
 export const getCartTotal = (cart) =>
   Array.isArray(cart)
-    ? cart.reduce((sum, item) => sum + Number(item?.quantity) * Number(item?.price), 0)
+    ? cart.reduce((sum, item) => {
+        const quantity = Number(item?.quantity);
+        const price = Number(item?.price);
+        return Number.isFinite(quantity) && Number.isFinite(price)
+          ? sum + quantity * price
+          : sum;
+      }, 0)
     : 0;
 
 export const isValidCheckoutCart = (cart, orderItems) =>
   Array.isArray(cart) &&
   cart.length > 0 &&
+  Array.isArray(orderItems) &&
   orderItems.length === cart.length &&
   orderItems.every(
     ({ product, color, quantity, price }) =>
-      product &&
-      color &&
+      typeof product === "string" &&
+      product.trim().length > 0 &&
+      typeof color === "string" &&
+      color.trim().length > 0 &&
       Number.isInteger(quantity) &&
       quantity > 0 &&
       Number.isFinite(price) &&
-      price >= 0
+      price >= 0 &&
+      Number.isFinite(getCartTotal(cart)) &&
+      Number.isFinite(quantity * price)
   );
