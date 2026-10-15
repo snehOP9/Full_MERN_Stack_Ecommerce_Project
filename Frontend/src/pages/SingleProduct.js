@@ -19,6 +19,7 @@ import {
 } from "../features/products/productSlilce";
 import { toast } from "react-toastify";
 import { addProdToCart, getUserCart } from "../features/user/userSlice";
+import sanitizeRichText from "../utils/sanitizeRichText";
 
 const SingleProduct = () => {
   const [color, setColor] = useState(null);
@@ -144,7 +145,7 @@ const SingleProduct = () => {
               {productState?.images.map((item, index) => {
                 return (
                   <div>
-                    <img src={item?.url} className="img-fluid" alt="" />
+                    <img src={item?.url} className="img-fluid" alt={`${productState?.title || "Product"} image ${index + 1}`} />
                   </div>
                 );
               })}
@@ -309,7 +310,7 @@ const SingleProduct = () => {
             <h4>Description</h4>
             <div className="bg-white p-3">
               <p
-                dangerouslySetInnerHTML={{ __html: productState?.description }}
+                dangerouslySetInnerHTML={{ __html: sanitizeRichText(productState?.description) }}
               ></p>
             </div>
           </div>
