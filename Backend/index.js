@@ -5,7 +5,7 @@ const dbConnect = require("./config/dbConnect");
 const { notFound, errorHandler } = require("./middlewares/errorHandler");
 const app = express();
 const dotenv = require("dotenv").config();
-const PORT = 5000;
+const PORT = Number(process.env.PORT ?? 5000);
 const authRouter = require("./routes/authRoute");
 const productRouter = require("./routes/productRoute");
 const blogRouter = require("./routes/blogRoute");
@@ -20,7 +20,6 @@ const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
 const cors = require("cors");
 
-dbConnect();
 app.use(morgan("dev"));
 app.use(cors());
 app.use(bodyParser.json());
@@ -39,6 +38,13 @@ app.use("/api/upload", uploadRouter);
 
 app.use(notFound);
 app.use(errorHandler);
-app.listen(PORT, () => {
-  console.log(`Server is running  at PORT ${PORT}`);
-});
+dbConnect()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running at PORT ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Database startup failed:", error.message);
+    process.exitCode = 1;
+  });
