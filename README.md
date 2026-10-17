@@ -8,9 +8,9 @@ For the ecommerce website, we have adopted the MERN stack, which comprises Mongo
 
 - React.js: For the front-end development, React.js is our library of choice. It enables us to create reusable UI components and efficiently manage the view layer of the application. React's virtual DOM helps in rendering updates efficiently, leading to a smooth user experience.
 
-- Node.js: Node.js serves as the server-side runtime environment, running JavaScript code outside the browser. It enables us to handle server logic, execute scripts, and interact with databases on the server-side.Safety Requirements
-<Specify those requirements that are concerned with possible loss, damage, or harm that could result from the use of the product. Define any safeguards or actions that must be taken, as well as actions that must be prevented. Refer to any external policies or regulations that state safety issues that affect the product’s design or use. Define any safety certifications that must be satisfied.>
-2	Back-end Development (Node.js and Express.js):
+- Node.js: Node.js serves as the server-side runtime environment, running JavaScript code outside the browser. It enables us to handle server logic, execute scripts, and interact with databases on the server-side.
+
+2. **Back-end Development (Node.js and Express.js):**
  We set up a Node.js server using Express.js to handle incoming HTTP requests and responses. Express.js acts as the middleware to handle requests before routing them to the appropriate API endpoints. We implement RESTful APIs for user authentication, product management, shopping cart, and order processing. These APIs allow seamless communication between the front-end and back-end, enabling a responsive user experience.
 3	Front-end Development (React.js):
 Using Create React App or similar tools, we create a well-structured React.js project. This ensures a scalable and maintainable front-end codebase. We design and develop a user-friendly and responsive user interface for the ecommerce website. By creating reusable React components, we improve code reusability and modularity. React Router helps us manage client-side routing and navigation within the application..>
